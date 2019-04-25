@@ -1,0 +1,5 @@
+*/node_modules/*
+client/semantic/*
+client/build/*
+client/src/config/config.js
+client/src/registerServiceWorker.js

@@ -1,0 +1,43 @@
+.page-footer {
+  flex: 0 0 auto;
+  z-index: 20!important;
+  width:100%;
+  position: fixed;
+  bottom: 0;
+}
+
+/* Material Bootstrap overrides */
+
+.page-footer .nav-link {
+  text-transform: none;
+  color: #f5f5f5;
+}
+
+@media (max-width: 380px) {
+  .nav-pills {
+    display: flex;
+    padding: 1.4286em 0.8575em;
+  }
+  .nav-item {
+    align-items: center;
+    padding: 0 !important;
+    justify-content: center;
+    padding-bottom: 0 !important;
+  }
+}
+
+.page-footer .nav-link.active {
+  color: white;
+  margin-top: 0!important;
+}
+.nav-pills .nav-link span {
+  display: inline!important;
+}
+.page-footer .nav-link > span {
+  font-weight: normal;
+  display: inline!important;
+}
+
+.page-footer .nav-link.active > span {
+  display: inline;
+}
