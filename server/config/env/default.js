@@ -52,5 +52,17 @@ module.exports = {
     p3p: 'ABCDEF',
     xssProtection: true
   },
-  favicon: 'client/public/favicon.ico'
+  favicon: 'client/public/favicon.ico',
+  mailer: {
+    from: process.env.MAILER_EMAIL,
+    options: {
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: 'true',
+      auth: {
+        user: process.env.MAILER_EMAIL,
+        pass: process.env.MAILER_PASS
+      }
+    }
+  },
 };

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Client from 'Client';
 
 import config from 'config/config';
-import meditation from 'images/landing.jpeg';
 import { Grid, Button, Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import './Landing.css';
@@ -22,9 +21,6 @@ class Landing extends Component {
   render() {
     return (
       <Grid container className="page landing-page" direction="column">
-        <Grid item xs={4}>
-          <img src={meditation} alt="Meditation" />
-        </Grid>
         <Grid item xs={4}></Grid>
         <Grid item xs={3}>
           <Typography variant="h5" gutterBottom>

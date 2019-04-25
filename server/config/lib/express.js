@@ -128,10 +128,7 @@ module.exports.initHelmetHeaders = function(app) {
   // Six months expiration period specified in seconds
   let SIX_MONTHS = 15778476;
 
-  app.use(helmet.frameguard({
-    action: 'allow-from',
-    domain: process.env.DOMAIN_MARKETING
-  }));
+  app.use(helmet.frameguard());
   app.use(helmet.xssFilter());
   app.use(helmet.noSniff());
   app.use(helmet.ieNoOpen());

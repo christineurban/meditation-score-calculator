@@ -83,7 +83,7 @@ class Signup extends Component {
         <Grid container justify="center" alignItems="flex-end">
           <Grid item xs={9}>
             <Typography variant="h4" gutterBottom>
-              Let&apos;s start<br />building!
+              Start Tracking Better Today
             </Typography>
           </Grid>
           <Grid item xs={9}>
