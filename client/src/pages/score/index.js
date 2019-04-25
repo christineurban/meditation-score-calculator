@@ -20,7 +20,7 @@ const styles = {
   },
   pos: {
     marginBottom: 12
-  },
+  }
 };
 
 
