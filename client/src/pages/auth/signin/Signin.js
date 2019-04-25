@@ -25,10 +25,9 @@ class Signin extends Component {
     super(props);
 
     this.classes = props.classes;
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  async handleSubmit(event) {
+  handleSubmit = async (event) => {
     event.preventDefault();
     this.setState({
       signinProgress: INPROGRESS,
@@ -88,7 +87,7 @@ class Signin extends Component {
         <Grid container justify="center" alignItems="flex-end">
           <Grid item xs={9}>
             <Typography variant="h4" gutterBottom>
-              Sign Up
+              Welcome Back
             </Typography>
           </Grid>
           <Grid item xs={9}>

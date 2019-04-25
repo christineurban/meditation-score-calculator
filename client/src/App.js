@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Landing from './pages/landing/Landing';
-import Signup from './pages/auth/signup/Signup';
-import Signin from './pages/auth/signin/Signin';
-import Profile from './pages/profile/Profile';
+import Landing from 'pages/landing/Landing';
+import Signup from 'pages/auth/signup/Signup';
+import Signin from 'pages/auth/signin/Signin';
+import Profile from 'pages/profile/Profile';
+import Score from  'pages/score/Score';
 
 
 const theme = createMuiTheme({
@@ -25,6 +26,7 @@ class App extends Component {
           <Route path="/signin" component={Signin} />
           <Route path="/logout" component={Landing} logout={true} />
           <Route path="/profile" component={Profile} />
+          <Route path="/score" component={Score} />
         </MuiThemeProvider>
       </Router>
     );
