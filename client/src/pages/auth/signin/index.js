@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Client from 'Client';
-
 import { Grid, Button, Snackbar, TextField, Typography } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
+
+import Client from 'Client';
 import config from 'config/config';
 
 const INPROGRESS = 'inprogress';
@@ -25,6 +25,10 @@ class Signin extends Component {
     };
 
     this.classes = props.classes;
+  }
+
+  componentDidMount() {
+    document.title = `Sign In | ${config.app.title}`;
   }
 
   handleSubmit = async (event) => {

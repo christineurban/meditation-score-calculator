@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Client from 'Client';
-
-import config from 'config/config';
-import { Grid, Button, Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { Grid, Button, Typography } from '@material-ui/core';
+
+import Client from 'Client';
+import config from 'config/config';
 import './Landing.css';
 
 
@@ -16,6 +16,10 @@ class Landing extends Component {
     if (props.match.path === '/logout') {
       Client.fetch('/api/auth/signout');
     }
+  }
+
+  componentDidMount() {
+    document.title = `${config.app.title}`;
   }
 
   render() {

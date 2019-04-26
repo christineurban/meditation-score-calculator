@@ -21,6 +21,24 @@ exports.invokeRolesPolicies = function() {
     }, {
       resources: '/api/users/password',
       permissions: '*'
+    }, {
+      resources: '/api/meditations',
+      permissions: '*'
+    }, {
+      resources: '/api/meditations/:meditationId',
+      permissions: '*'
+    }, {
+      resources: '/api/days',
+      permissions: '*'
+    }, {
+      resources: '/api/days/:dayId',
+      permissions: '*'
+    }, {
+      resources: '/api/seasons',
+      permissions: '*'
+    }, {
+      resources: '/api/seasons/:seasonId',
+      permissions: '*'
     }]
   }]);
 };

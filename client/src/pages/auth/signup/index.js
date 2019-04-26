@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Client from 'Client';
-
-import config from 'config/config';
 import { Button, Grid, Snackbar, TextField, Typography } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
+
+import Client from 'Client';
+import config from 'config/config';
 
 const INPROGRESS = 'inprogress';
 const SUCCESS = 'success';

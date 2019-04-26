@@ -42,7 +42,7 @@ class AddMeditation extends Component {
     };
 
     this.classes = props.classes;
-  };
+  }
 
   handleMinutesChange = (evt) => {
     this.setState({ minutes: evt.target.value });

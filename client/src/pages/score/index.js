@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
 import {
   Button,
   Card,
@@ -9,6 +8,9 @@ import {
   Typography
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+
+import Client from 'Client';
+import config from 'config/config';
 import AddMeditation from 'components/meditation/add';
 
 const styles = (theme) => ({
@@ -40,11 +42,23 @@ class Score extends Component {
 
     this.state = {
       score: '',
-      quarter: '',
+      season: '',
       open: false
     };
 
     this.classes = props.classes;
+  }
+
+  componentDidMount() {
+    document.title = `Score | ${config.app.title}`;
+
+    Client.fetch('/api/dashboard').then((data = {}) => {
+      this.setState({
+        metrics: data.metrics,
+        files: data.files,
+        activities: data.activities
+      });
+    });
   }
 
   handleClickOpen = () => {
