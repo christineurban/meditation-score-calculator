@@ -11,7 +11,6 @@ let whitelistedFields = ['firstName', 'lastName', 'email'];
 exports.me = me;
 exports.update = update;
 
-
 /**
  * Update user details
  */

@@ -1,17 +1,17 @@
 /**
  * Module dependencies
  */
-let path = require('path'),
-    config = require(path.resolve('./server/config/config')),
-    errorHandler = require(path.resolve('./server/controllers/errors.controller')),
-    mongoose = require('mongoose'),
-    nodemailer = require('nodemailer'),
-    asyncLib = require('async'),
-    crypto = require('crypto');
+const path = require('path'),
+      config = require(path.resolve('./server/config/config')),
+      errorHandler = require(path.resolve('./server/controllers/errors.controller')),
+      mongoose = require('mongoose'),
+      nodemailer = require('nodemailer'),
+      asyncLib = require('async'),
+      crypto = require('crypto');
 
-let User = mongoose.model('User');
+const User = mongoose.model('User');
 
-let smtpTransport = nodemailer.createTransport(config.mailer.options);
+const smtpTransport = nodemailer.createTransport(config.mailer.options);
 
 exports.forgot = forgot;
 exports.validateResetToken = validateResetToken;

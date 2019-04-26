@@ -32,8 +32,8 @@ class App extends Component {
           <Route path="/profile" component={Profile} />
           <Route path="/score" component={Score} />
           <Route path="/meditations" component={Meditations} />
-          <Route path="/days" component={Days} />
-          <Route path="/seasons" component={Seasons} />
+          {/* <Route path="/days" component={Days} />
+          <Route path="/seasons" component={Seasons} /> */}
         </MuiThemeProvider>
       </Router>
     );

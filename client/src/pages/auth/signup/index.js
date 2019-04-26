@@ -12,19 +12,20 @@ const ERROR = 'error';
 
 
 class Signup extends Component {
-  state = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    signupProgress: null, // null, INPROGRESS, SUCCESS, ERROR
-    open: false,
-    errorMsg: '',
-    disabled: false
-  };
-
   constructor(props) {
     super(props);
+
+    this.state = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      signupProgress: null, // null, INPROGRESS, SUCCESS, ERROR
+      open: false,
+      errorMsg: '',
+      disabled: false
+    };
+
     this.classes = props.classes;
   }
 

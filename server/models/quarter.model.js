@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-
 /**
  * Quarter Schema
  */
@@ -13,10 +12,10 @@ const QuarterSchema = new Schema({
     enum: ['Spring Equinox', 'Summer Solstice', 'Fall Equinox', 'Winter Solstice'],
     required: 'Please provide the name of this Quarter'
   },
-  start: {
+  startDate: {
     type: Date
   },
-  end: {
+  endDate: {
     type: Date
   },
   days: [{
@@ -44,7 +43,7 @@ const QuarterSchema = new Schema({
  * Calculate meditation score before saving
  */
 QuarterSchema.pre('save', function(next) {
-  const totalDays = (_normalizeDate(new Date()) - _normalizeDate(this.start)) / (60 * 60 * 24 * 1000) + 1;
+  const totalDays = (_normalizeDate(new Date()) - _normalizeDate(this.startDate)) / (60 * 60 * 24 * 1000) + 1;
   const subScore = this.days.reduce((accum, day) => {
     return day.totalMinutes + accum;
   }, 0);

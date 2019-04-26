@@ -4,7 +4,8 @@
 let policy = require('../policies/general.policies'),
     users = require('../controllers/users.controller'),
     auth = require('../controllers/authentication.controller'),
-    password = require('../controllers/password.controller');
+    password = require('../controllers/password.controller'),
+    meditations = require('../controllers/meditations.controller');
 
 module.exports = function(app) {
   // Setting up the authentication api
@@ -24,4 +25,15 @@ module.exports = function(app) {
     .put(users.update);
   app.route('/api/users/password').all(policy.isAllowed)
     .post(password.changePassword);
+
+  // Meditation routes
+  app.route('/api/meditations').all(policy.isAllowed)
+    .get(meditations.listMeditations)
+    .post(meditations.saveNewMeditation);
+  app.route('/api/meditations/:meditationId').all(policy.isAllowed)
+    .get(meditations.loadMeditation)
+    .post(meditations.updateMeditation)
+    .delete(meditations.removeMeditation);
+  // Finish by binding the meditation middleware
+  app.param('meditationId', meditations.meditationById);
 };
