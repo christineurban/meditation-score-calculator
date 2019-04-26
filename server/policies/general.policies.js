@@ -37,6 +37,9 @@ exports.invokeRolesPolicies = function() {
       resources: '/api/seasons',
       permissions: '*'
     }, {
+      resources: '/api/currentSeason',
+      permissions: '*'
+    }, {
       resources: '/api/seasons/:seasonId',
       permissions: '*'
     }]

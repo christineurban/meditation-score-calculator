@@ -9,7 +9,7 @@ const SeasonSchema = new Schema({
   name: {
     type: String,
     trim: true,
-    enum: ['Spring Equinox', 'Summer Solstice', 'Fall Equinox', 'Winter Solstice'],
+    enum: ['Spring', 'Summer', 'Fall', 'Winter'],
     required: 'Please provide the name of this Season'
   },
   startDate: {
@@ -52,6 +52,21 @@ SeasonSchema.pre('save', function(next) {
 
   next();
 });
+
+/**
+ * Get upcoming Solstice/Equinox name
+*/
+SeasonSchema.methods.getUpcomingName = function() {
+  const nextSeasonMap = {
+    spring: 'Summer Solstice',
+    summer: 'Fall Equinox',
+    fall: 'Winter Solstice',
+    winter: 'Spring Equinox'
+  };
+
+  return nextSeasonMap[this.name];
+};
+
 
 function _normalizeDate(date) {
   date.setHours(0);

@@ -58,6 +58,8 @@ module.exports = function(app) {
     .get(seasons.loadSeason)
     .post(seasons.updateSeason)
     .delete(seasons.removeSeason);
+  app.route('/api/currentSeason').all(policy.isAllowed)
+    .get(seasons.getCurrentSeason);
   // Finish by binding the season middleware
   app.param('seasonId', seasons.seasonById);
 };

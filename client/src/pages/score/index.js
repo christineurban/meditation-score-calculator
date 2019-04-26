@@ -42,7 +42,10 @@ class Score extends Component {
 
     this.state = {
       score: '',
-      season: '',
+      seasonName: '',
+      endOfSeasonName: '',
+      startDate: '',
+      endDate: '',
       open: false
     };
 
@@ -52,11 +55,16 @@ class Score extends Component {
   componentDidMount() {
     document.title = `Score | ${config.app.title}`;
 
-    Client.fetch('/api/dashboard').then((data = {}) => {
+    Client.fetch('/api/currentSeason', {
+      method: 'POST',
+      body: { date: new Date() }
+    }).then((season = {}) => {
       this.setState({
-        metrics: data.metrics,
-        files: data.files,
-        activities: data.activities
+        score: season.score,
+        seasonName: season.name,
+        endOfSeasonName: season.endOfSeasonName,
+        startDate: season.startDate,
+        endDate: season.endDate
       });
     });
   }
