@@ -1,11 +1,10 @@
 /**
  * Module dependencies.
  */
-const path = require('path'),
-      mongoose = require('mongoose'),
+const mongoose = require('mongoose'),
       passport = require('passport'),
       validator = require('validator'),
-      errorHandler = require(path.resolve('./server/controllers/errors.controller'));
+      errorHandler = require('./errors.controller');
 
 const User = mongoose.model('User');
 

@@ -14,12 +14,18 @@ const MeditationSchema = new Schema({
     type: Date,
     required: 'An Meditation must have a datetime'
   },
+  day: {
+    type: Schema.ObjectId,
+    ref: 'Day'
+  },
   _userId: {
     type: String,
     trim: true,
     required: 'An Meditation must belong to an user',
     select: false
   }
+}, {
+  timestamps: true
 });
 
 

@@ -1,9 +1,8 @@
 /**
  * Module dependencies
  */
-const path = require('path'),
-      config = require(path.resolve('./server/config/config')),
-      errorHandler = require(path.resolve('./server/controllers/errors.controller')),
+const config = require('./server/config/config'),
+      errorHandler = require('./errors.controller'),
       mongoose = require('mongoose'),
       nodemailer = require('nodemailer'),
       asyncLib = require('async'),

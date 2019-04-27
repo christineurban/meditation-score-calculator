@@ -4,7 +4,7 @@
 let _ = require('lodash'),
     path = require('path'),
     validator = require('validator'),
-    errorHandler = require(path.resolve('./server/controllers/errors.controller'));
+    errorHandler = require('./errors.controller');
 
 let whitelistedFields = ['firstName', 'lastName', 'email'];
 

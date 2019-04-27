@@ -7,7 +7,9 @@ const Schema = mongoose.Schema;
  */
 const DaySchema = new Schema({
   date: {
-    type: Date
+    type: String, // 2019-09-22
+    trim: true,
+    required: 'A Day must have a date'
   },
   meditations: [{
     type: Schema.ObjectId,
@@ -17,14 +19,16 @@ const DaySchema = new Schema({
     type: Number,
     default: 0
   },
+  season: {
+    type: Schema.ObjectId,
+    ref: 'Season'
+  },
   _userId: {
     type: String,
     trim: true,
     required: 'An Day must belong to an user',
     select: false
   }
-}, {
-  timestamps: true
 });
 
 /**

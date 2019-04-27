@@ -1,6 +1,7 @@
-const path = require('path'),
-      errorHandler = require(path.resolve('./server/controllers/errors.controller')),
-      mongoose = require('mongoose');
+const mongoose = require('mongoose'),
+      daysController = require('./days.controller'),
+      seasonsController = require('./seasons.controller'),
+      errorHandler = require('./errors.controller');
 
 const Meditation = mongoose.model('Meditation');
 
@@ -62,7 +63,13 @@ function loadMeditation(req, res) {
 }
 
 async function saveNewMeditation(req, res) {
-  // Start by creating a new meditation out of the request body
+  const date = req.body.date;
+  // start by getting/creating a season
+  const season = seasonsController.getSeasonByDate(date, req.user);
+  // then get/create a day and pass the minutes to it
+  const day = daysController.getDayByDate(date, season, req.body.minutes, req.user);
+
+  // Create a new meditation out of the request body
   let meditation = new Meditation(req.body);
 
   // And fill out the user field (don't trust the ui)
@@ -72,9 +79,17 @@ async function saveNewMeditation(req, res) {
   try {
     meditation = await meditation.save();
   } catch (e) {
-    console.log(e);
     return errorHandler.handleError(res, 500, e);
   }
+
+  // Add the meditation to the day
+  day.meditations.addToSet(meditation._id);
+
+  // And the day to the meditation
+  meditation.day = day._id;
+
+  // Trigger a season score calculation
+  seasonsController.calculateScore(season, date);
 
   // And return the saved meditation to the ui
   res.json(meditation);

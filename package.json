@@ -37,6 +37,7 @@
     "react-dom": "^16.4.2",
     "react-moment": "^0.8.4",
     "react-router-dom": "^5.0.0",
+    "request": "^2.88.0",
     "serve-favicon": "^2.5.0",
     "validator": "^10.3.0",
     "winston": "^2.4.3"
