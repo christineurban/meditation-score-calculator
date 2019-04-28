@@ -8,6 +8,7 @@ import {
   Typography
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import moment from 'moment';
 
 import Client from 'Client';
 import config from 'config/config';
@@ -18,7 +19,7 @@ const styles = (theme) => ({
     minWidth: 275
   },
   button: {
-    margin: theme.spacing.unit
+    marginTop: theme.spacing.unit
   },
   grid: {
     width: '100%',
@@ -46,6 +47,7 @@ class Score extends Component {
       endOfSeasonName: '',
       startDate: '',
       endDate: '',
+      daysUntilEndOfSeason: '',
       open: false
     };
 
@@ -55,16 +57,19 @@ class Score extends Component {
   componentDidMount() {
     document.title = `Score | ${config.app.title}`;
 
-    Client.fetch('/api/currentSeason', {
+    const date = new Date();
+
+    Client.fetch('/api/getCurrentSeason', {
       method: 'POST',
-      body: { date: new Date() }
+      body: { date, tz: -(date.getTimezoneOffset() / 60) }
     }).then((season = {}) => {
       this.setState({
         score: season.score,
         seasonName: season.name,
         endOfSeasonName: season.endOfSeasonName,
-        startDate: season.startDate,
-        endDate: season.endDate
+        startDate: this.parseDatetoString(season.startDate),
+        endDate: this.parseDatetoString(season.endDate),
+        daysUntilEndOfSeason: this.getDaysUntilEndOfSeason(season.endDate)
       });
     });
   }
@@ -77,40 +82,88 @@ class Score extends Component {
     this.setState({ open: !this.state.open });
   };
 
+  parseDatetoString = (date) => {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    const month = Math.floor(date / 100) % 100 - 1;
+    const day = date % 100;
+
+    return `${months[month]} ${day}`;
+  }
+
+  getDaysUntilEndOfSeason = (endDate) => {
+    if (endDate) {
+      const curr = new moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+      const year = Math.floor(endDate / 10000)
+      const month = Math.floor(endDate / 100) % 100 - 1;
+      const day = endDate % 100;
+      const end = moment(`${year}-${month}-${day}`);
+
+      return (end - curr) / (60 * 60 * 24 * 1000);
+    }
+  }
 
   render() {
     return (
-      <Grid container className={this.classes.grid} justify="space-around"
+      <Grid
+        container
+        className={this.classes.grid}
+        direction="column"
+        justify="center"
+        alignItems="center"
       >
-        <Card className={this.classes.card}>
-          <CardContent>
-            <Typography className={this.classes.title} align="center" color="textSecondary" gutterBottom>
-              Your Meditation Score
-            </Typography>
-            <Typography variant="h1" component="h2" align="center">
-              75
-            </Typography>
-            <Typography className={this.classes.pos} color="textSecondary" align="center">
-              March 23 - June 22
-            </Typography>
-            <Typography component="p" align="center">
-              5 more days until the Summer Solstice
-            </Typography>
-          </CardContent>
-        </Card>
-        <Button
-          variant="contained"
-          className={this.classes.button}
-          onClick={this.handleClickOpen}
-        >
-          Add a Meditation
-        </Button>
-        {this.state.open ? (
-          <AddMeditation
-            open={this.state.open}
-            toggleAddMeditation={this.toggleAddMeditation}
-          />
-        ) : null}
+        {this.state.score === '' ? (
+          <div></div>
+        ) : (
+          <div>
+            <Grid item xs={12}>
+              <Card className={this.classes.card}>
+                <CardContent>
+                  <Typography className={this.classes.title} align="center" color="textSecondary" gutterBottom>
+                    Your Meditation Score
+                  </Typography>
+                  <Typography variant="h1" component="h2" align="center">
+                    {this.state.score}
+                  </Typography>
+                  <Typography className={this.classes.pos} color="textSecondary" align="center">
+                    {this.state.startDate} - {this.state.endDate}
+                  </Typography>
+                  <Typography component="p" align="center">
+                    {this.state.daysUntilEndOfSeason} more days until the {this.state.endOfSeasonName}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                className={this.classes.button}
+                onClick={this.handleClickOpen}
+                fullWidth
+              >
+                Add a Meditation
+              </Button>
+            </Grid>
+            {this.state.open ? (
+              <AddMeditation
+                open={this.state.open}
+                toggleAddMeditation={this.toggleAddMeditation}
+              />
+            ) : null}
+          </div>
+        )}
       </Grid>
     );
   }

@@ -27,7 +27,7 @@
     "jquery": "^3.3.1",
     "lusca": "^1.6.0",
     "material-ui-pickers": "^2.2.4",
-    "moment": "^2.22.2",
+    "moment": "^2.24.0",
     "mongoose": "^5.2.10",
     "morgan": "^1.9.0",
     "nodemailer": "^4.6.7",
@@ -37,7 +37,7 @@
     "react-dom": "^16.4.2",
     "react-moment": "^0.8.4",
     "react-router-dom": "^5.0.0",
-    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
     "serve-favicon": "^2.5.0",
     "validator": "^10.3.0",
     "winston": "^2.4.3"

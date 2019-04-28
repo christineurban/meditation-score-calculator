@@ -10,9 +10,9 @@ const MeditationSchema = new Schema({
     type: Number,
     required: 'An Meditation must have minutes'
   },
-  dateTime: {
-    type: Date,
-    required: 'An Meditation must have a datetime'
+  time: {
+    type: Number, // 1330
+    required: 'An Meditation must have a time'
   },
   day: {
     type: Schema.ObjectId,

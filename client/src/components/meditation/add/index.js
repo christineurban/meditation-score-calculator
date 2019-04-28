@@ -83,32 +83,42 @@ class AddMeditation extends Component {
       >
         <DialogTitle id="form-dialog-title">How many minutes was your meditation?</DialogTitle>
         <form onSubmit={this.handleSubmit}>
-          <Grid container className={this.classes.grid} justify="space-around">
-            <TextField
-              id="outlined-number"
-              label="Minutes"
-              onChange={this.handleMinutesChange}
-              type="number"
-              className={this.classes.textField}
-              InputLabelProps={{
-                shrink: true
-              }}
-              margin="normal"
-              variant="outlined"
-              required
-            />
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <DateTimePicker
+          <Grid
+            container
+            className={this.classes.grid}
+            direction="column"
+            justify="center"
+            alignItems="center"
+          >
+            <Grid item xs={12}>
+              <TextField
+                id="outlined-number"
+                label="Minutes"
+                onChange={this.handleMinutesChange}
+                type="number"
+                className={this.classes.textField}
+                InputLabelProps={{
+                  shrink: true
+                }}
                 margin="normal"
-                label="Date and Time"
                 variant="outlined"
-                value={this.state.time}
-                onChange={this.handleTimeChange}
-                format="MMM dd yyyy, h:mm a"
-                showTodayButton
-                disableFuture
+                required
               />
-            </MuiPickersUtilsProvider>
+            </Grid>
+            <Grid item xs={12}>
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <DateTimePicker
+                  margin="normal"
+                  label="Date and Time"
+                  variant="outlined"
+                  value={this.state.time}
+                  onChange={this.handleTimeChange}
+                  format="MMM dd yyyy, h:mm a"
+                  showTodayButton
+                  disableFuture
+                />
+              </MuiPickersUtilsProvider>
+            </Grid>
           </Grid>
           <DialogActions>
             <Button type="submit" color="primary">

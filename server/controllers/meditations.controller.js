@@ -65,7 +65,7 @@ function loadMeditation(req, res) {
 async function saveNewMeditation(req, res) {
   const date = req.body.date;
   // start by getting/creating a season
-  const season = seasonsController.getSeasonByDate(date, req.user);
+  const season = seasonsController.getSeasonByDate(date, -(date.getTimezoneOffset() / 60), req.user);
   // then get/create a day and pass the minutes to it
   const day = daysController.getDayByDate(date, season, req.body.minutes, req.user);
 

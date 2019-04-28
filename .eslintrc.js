@@ -134,6 +134,7 @@ module.exports = {
     'max-statements-per-line': [ERROR, { max: 2 }],
     'multiline-ternary': [ERROR, 'always-multiline'],
     'new-cap': [ERROR, { newIsCapExceptions: ['acl.memoryBackend', 'acl'] }],
+    'no-case-declarations': OFF,
     'new-parens': ERROR,
     'newline-after-var': ['error', 'always'],
     'newline-per-chained-call': [ERROR, { ignoreChainWithDepth: 2 }],

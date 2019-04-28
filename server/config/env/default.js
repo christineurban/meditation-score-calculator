@@ -64,5 +64,5 @@ module.exports = {
         pass: process.env.MAILER_PASS
       }
     }
-  },
+  }
 };

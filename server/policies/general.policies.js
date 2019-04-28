@@ -37,7 +37,7 @@ exports.invokeRolesPolicies = function() {
       resources: '/api/seasons',
       permissions: '*'
     }, {
-      resources: '/api/currentSeason',
+      resources: '/api/getCurrentSeason',
       permissions: '*'
     }, {
       resources: '/api/seasons/:seasonId',
@@ -50,7 +50,7 @@ exports.invokeRolesPolicies = function() {
  * Check if policy allows
  */
 exports.isAllowed = function(req, res, next) {
-  let roles = req.user ? req.user.roles : ['guest'];
+  let roles = req.user ? ['user'] : ['guest'];
 
   // Check for user roles
   acl.areAnyRolesAllowed(roles, req.route.path, req.method.toLowerCase(), (err, isAllowed) => {

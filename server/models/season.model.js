@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-      utils = require('../lib/utils');
+      dateUtil = require('../util/date');
 
 const Schema = mongoose.Schema;
 
@@ -14,13 +14,11 @@ const SeasonSchema = new Schema({
     required: 'Please provide the name of this Season'
   },
   startDate: {
-    type: String, // 2019-09-22
-    trim: true,
+    type: Number, // 20190922
     required: 'A Season must have a start date'
   },
   endDate: {
-    type: String, // 2019-12-21
-    trim: true,
+    type: Number, // 20191221
     required: 'A Season must have a end date'
   },
   adjustedStartDate: {
@@ -49,26 +47,12 @@ const SeasonSchema = new Schema({
  * Calculate meditation score before saving
  */
 SeasonSchema.methods.calculateScore = function(date) {
-  const totalDays = (utils.normalizeDate(date) - utils.normalizeDate(this.startDate)) / (60 * 60 * 24 * 1000) + 1;
+  const totalDays = (dateUtil.parseString(date) - dateUtil.parseString(this.startDate)) / (60 * 60 * 24 * 1000) + 1;
   const totalMinutes = this.days.reduce((minutes, day) => {
     return day.totalMinutes + minutes;
   }, 0);
 
   this.score = Math.round(totalMinutes / (totalDays * this.minutesPerDayRequired));
-};
-
-/**
- * Get upcoming Solstice/Equinox name
-*/
-SeasonSchema.methods.getUpcomingName = function() {
-  const nextSeasonMap = {
-    spring: 'Summer Solstice',
-    summer: 'Fall Equinox',
-    fall: 'Winter Solstice',
-    winter: 'Spring Equinox'
-  };
-
-  return nextSeasonMap[this.name];
 };
 
 

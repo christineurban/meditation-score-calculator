@@ -7,8 +7,7 @@ const Schema = mongoose.Schema;
  */
 const DaySchema = new Schema({
   date: {
-    type: String, // 2019-09-22
-    trim: true,
+    type: Number, // 20190922
     required: 'A Day must have a date'
   },
   meditations: [{

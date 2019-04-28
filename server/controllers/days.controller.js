@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-      utils = require('../lib/utils'),
+      dateUtil = require('../util/date'),
       errorHandler = require('./errors.controller');
 
 const Day = mongoose.model('Day');
@@ -44,7 +44,8 @@ async function dayById(req, res, next, id) {
 
 async function getDayByDate(clientDate, season, minutes, user) {
   // reset time to midnight
-  const date = utils.normalizeDate(clientDate);
+  const date = dateUtil.parseString(clientDate);
+
   let day;
 
   // check if the day exists
@@ -70,7 +71,7 @@ async function getDayByDate(clientDate, season, minutes, user) {
   try {
     day = await day.save();
   } catch (e) {
-    return errorHandler.handleError(res, 500, e);
+    return errorHandler.handleError({}, 500, e);
   }
 
   return day;
@@ -100,7 +101,7 @@ async function saveNewDay(date, season, minutes, user) {
   // Make a season with the data
   let day = new Day({
     _userId: user._id,
-    date: utils.getDateString(date),
+    date: dateUtil.parseString(date),
     totalMinutes: minutes,
     season: season._id
   });

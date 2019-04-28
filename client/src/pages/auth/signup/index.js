@@ -127,7 +127,7 @@ class Signup extends Component {
                       disabled={this.state.disabled}>
                 Sign Up
               </Button>
-              {this.state.signupProgress === SUCCESS ? <Redirect to="/dashboard" /> : ''}
+              {this.state.signupProgress === SUCCESS ? <Redirect to="/score" /> : ''}
             </form>
           </Grid>
         </Grid>

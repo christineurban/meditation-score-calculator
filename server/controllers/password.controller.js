@@ -1,7 +1,7 @@
 /**
  * Module dependencies
  */
-const config = require('./server/config/config'),
+const config = require('../config/config'),
       errorHandler = require('./errors.controller'),
       mongoose = require('mongoose'),
       nodemailer = require('nodemailer'),
@@ -65,7 +65,7 @@ function forgot(req, res, next) {
       }
       let baseUrl = config.domain || httpTransport + req.headers.host;
 
-      res.render(path.resolve('server/templates/reset-password-email'), {
+      res.render('../templates/reset-password-email', {
         name: user.displayName,
         appName: config.app.title,
         url: `${baseUrl}/api/auth/reset/${token}`

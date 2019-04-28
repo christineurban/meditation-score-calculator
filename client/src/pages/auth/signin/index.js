@@ -81,10 +81,6 @@ class Signin extends Component {
     this.setState({ open: false });
   };
 
-  componentDidMount() {
-    document.title = `Signin | ${config.app.title}`;
-  }
-
   render() {
     return (
       <div>
@@ -120,7 +116,7 @@ class Signin extends Component {
                       disabled={this.state.disabled}>
                 Sign In
               </Button>
-              {this.state.signinProgress === SUCCESS ? <Redirect to="/dashboard" /> : ''}
+              {this.state.signinProgress === SUCCESS ? <Redirect to="/score" /> : ''}
             </form>
             <Snackbar
               anchorOrigin={{

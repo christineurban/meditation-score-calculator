@@ -1,11 +1,12 @@
-const request = require('request'),
+const rp = require('request-promise'),
       mongoose = require('mongoose'),
-      utils = require('../lib/utils'),
+      dateUtil = require('../util/date'),
       errorHandler = require('./errors.controller');
 
 const Season = mongoose.model('Season');
 
 exports.seasonById = seasonById;
+exports.getCurrentSeason = getCurrentSeason;
 exports.getSeasonByDate = getSeasonByDate;
 exports.listSeasons = listSeasons;
 exports.loadSeason = loadSeason;
@@ -43,32 +44,48 @@ async function seasonById(req, res, next, id) {
   next();
 }
 
-async function getSeasonByDate(clientDate, user) {
-  // reset time to midnight
-  const date = utils.normalizeDate(clientDate);
-  let season;
+async function getCurrentSeason(req, res) {
+  const date = req.body.date;
+  const tz = req.body.tz;
 
-  // check if the season exists
-  try {
-    season = await Season.findOne({
-      _userId: user._id,
-      startDate: { $gte: date },
-      endDate: { $lte: date }
-    });
-  } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+  let season = await _getSeasonByDate(date, tz, req.user);
+
+  if (!season) {
+    const { start, end } = await _findApplicableSeason(
+      date,
+      tz,
+      await _getSeasonData(dateUtil.getYear(date), tz)
+    );
+
+    const seasonName = _getSeasonName(start);
+
+    season = {
+      score: 0,
+      seasonName,
+      endOfSeasonName: _getEndOfSeasonName(seasonName),
+      startDate: dateUtil.parseData(start),
+      endDate: dateUtil.parseData(end)
+    };
+  } else {
+    season.endOfSeasonName = _getEndOfSeasonName(season.name);
   }
+  console.log(season)
+  res.json(season);
+}
+
+async function getSeasonByDate(clientDate, tz, user) {
+  const season = await _getSeasonByDate(clientDate, tz, user);
 
   // if it does not, make one based on current date sent from the client
   if (!season) {
-    saveNewSeason(date, user);
+    saveNewSeason(clientDate, tz, user);
   }
 
   return season;
 }
 
 async function listSeasons(req, res) {
-  /*q
+  /*
    * Find the 20 most recent seasons
    */
   let query = Season
@@ -87,59 +104,16 @@ function loadSeason(req, res) {
   res.json(req.season);
 }
 
-async function saveNewSeason(date, user) {
-  // make request to get common equinox and solstice data
-  const seasonData = _getSeasonData(date, date.getFullYear());
-  let start, end;
-
-  // find the applicable season
-  seasonData.forEach((data) => {
-    if (
-      data.name in ['Equinox', 'Solstice']
-      && ((date.getMonth() === parseInt(data.month) && date.getDay() <= parseInt(data.day)) // same month, lesser day
-      || date.getMonth() < parseInt(data.month)) // lesser month
-    ) {
-      switch (data.month) {
-        // season goes into previous year
-        case 3:
-          start = _getSeasonData(date, date.getFullYear() - 1).find((past) => {
-            return past.month === 12;
-          });
-
-          end = data;
-          break;
-        // season is in the same year
-        case 6:
-        case 9:
-        case 12:
-          start = seasonData.find((current) => {
-            return current.month = data.month - 3;
-          });
-
-          end = data;
-          break;
-        default:
-          console.error('Season month not found.')
-      }
-    }
-    else {
-      // season goes into next year
-      start = seasonData.find((current) => {
-        return current.month = 12;
-      });
-
-      end = _getSeasonData(date, date.getFullYear() - 1).find((future) => {
-        return future.month === 3;
-      });
-    }
-  });
+async function saveNewSeason(date, tz, user) {
+  // make request to get common equinox and solstice data, and find the season range
+  const { start, end } = _findApplicableSeason(date, tz, await _getSeasonData(dateUtil.getYear(date), tz));
 
   // Make a season with the data
   let season = new Season({
     _userId: user._id,
-    name: _getDisplayName(data),
-    startDate: `${start.year}-${start.month}-${start.day}`,
-    endDate: `${end.year}-${end.month}-${end.day}`
+    name: _getDisplayName(end),
+    startDate: dateUtil.parseData(start),
+    endDate: dateUtil.parseData(end)
   });
 
   // Save the season
@@ -182,25 +156,97 @@ async function removeSeason(req, res) {
   res.sendStatus(200);
 }
 
-function _getDisplayName(item) {
-  if (item.name === 'Equinox') {
-      return item.month === 3 ? 'Spring Equinox' : 'Fall Equinox';
-  }
-  return item.month === 6 ? 'Summer Solstice' : 'Winter Solstice';
-  }
-};
+async function _getSeasonByDate(clientDate, user) {
+  // reset time to midnight
+  const date = dateUtil.parseString(clientDate);
 
-function _getSeasonData(date, year) {
+  let season;
+
+  // check if the season exists
+  try {
+    season = await Season.findOne({
+      _userId: user._id,
+      startDate: { $gte: date },
+      endDate: { $lte: date }
+    });
+  } catch (e) {
+    return errorHandler.handleError({}, 500, e);
+  }
+
+  return season;
+}
+
+function _getSeasonName(data) {
+  if (data.phenom === 'Equinox') {
+    return data.month <= 3 ? 'Spring' : 'Fall';
+  }
+  return data.month <= 6 ? 'Summer' : 'Winter';
+}
+
+function _getEndOfSeasonName(name) {
+  const nextSeasonMap = {
+    Spring: 'Summer Solstice',
+    Summer: 'Fall Equinox',
+    Fall: 'Winter Solstice',
+    Winter: 'Spring Equinox'
+  };
+
+  return nextSeasonMap[name];
+}
+
+async function _getSeasonData(year, tz) {
   // https://aa.usno.navy.mil/data/docs/api.php
-  request(
-    `https://api.usno.navy.mil/seasons?year=${year}&tz=${-(date.getTimezoneOffset() / 60)}&dst=true`,
-    (error, response, body) => {
-      if (error) {
-        console.error('error:', error);
-        console.log('statusCode:', response && response.statusCode);
-      }
+  let seasonData;
 
-      return body;
+  try {
+    seasonData = await rp(`https://api.usno.navy.mil/seasons?year=${year}&tz=${tz}&dst=true`);
+  } catch (e) {
+    return errorHandler.handleError({}, 500, e);
+  }
+
+  return JSON.parse(seasonData).data.filter((data) => {
+    return data.phenom === 'Equinox' || data.phenom === 'Solstice';
+  });
+}
+
+async function _findApplicableSeason(date, tz, seasonData) {
+  let start,
+      end;
+
+  // find the applicable end season
+  end = seasonData.find((data) => {
+    // same month, lesser day
+    return dateUtil.getMonth(date) === parseInt(data.month) && dateUtil.getDay(date) <= parseInt(data.day)
+    // lesser month
+    || dateUtil.getMonth(date) < parseInt(data.month);
+  });
+
+  if (end) {
+    if (end.month === '3') {
+      // start season goes into previous year
+      const prevYear = await _getSeasonData(dateUtil.getYear(date) - 1, tz);
+
+      start = prevYear.find((past) => {
+        return past.month === '12';
+      });
+    } else {
+      // season is in the same year
+      start = seasonData.find((current) => {
+        return parseInt(current.month) === parseInt(end.month) - 3;
+      });
     }
-  );
+  } else {
+    // end season goes into next year
+    const nextYear = await _getSeasonData(dateUtil.getYear(date) - 1, tz);
+
+    end = nextYear.find((future) => {
+      return future.month === '3';
+    });
+
+    start = seasonData.find((current) => {
+      return current.month === '12';
+    });
+  }
+
+  return { start, end };
 }

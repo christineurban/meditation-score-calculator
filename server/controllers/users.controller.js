@@ -2,7 +2,6 @@
  * Module dependencies
  */
 let _ = require('lodash'),
-    path = require('path'),
     validator = require('validator'),
     errorHandler = require('./errors.controller');
 

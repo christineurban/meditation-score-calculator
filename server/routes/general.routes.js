@@ -49,7 +49,6 @@ module.exports = function(app) {
     .delete(days.removeDay);
   // Finish by binding the day middleware
   app.param('dayId', days.dayById);
-
   // Season routes
   app.route('/api/seasons').all(policy.isAllowed)
     .get(seasons.listSeasons)
@@ -58,8 +57,8 @@ module.exports = function(app) {
     .get(seasons.loadSeason)
     .post(seasons.updateSeason)
     .delete(seasons.removeSeason);
-  app.route('/api/currentSeason').all(policy.isAllowed)
-    .get(seasons.getSeasonByDate);
+  app.route('/api/getCurrentSeason').all(policy.isAllowed)
+    .post(seasons.getCurrentSeason);
   // Finish by binding the season middleware
   app.param('seasonId', seasons.seasonById);
 };
