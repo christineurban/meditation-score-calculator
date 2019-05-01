@@ -70,7 +70,7 @@ async function saveNewMeditation(req, res) {
   const date = dateUtil.parseDate(tzAdjustedDate);
 
   // start by getting/creating a season
-  let season = await seasonsController.getSeasonByDate(date, tz, req.user);
+  const season = await seasonsController.getSeasonByDate(date, tz, req.user);
 
   // then get/create a day and pass the minutes to it
   let day = await daysController.getDayByDate(date, season, minutes, req.user);
@@ -107,7 +107,7 @@ async function saveNewMeditation(req, res) {
   season.days.addToSet(day._id);
 
   // Trigger a season score calculation
-  season = await season.calculateScore(date);
+  await season.calculateScore(date);
 
   // And return the saved meditation, day, and season to the ui
   res.json({ meditation, day, season });

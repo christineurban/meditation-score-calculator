@@ -6,6 +6,7 @@ exports.getYear = getYear;
 exports.getMonth = getMonth;
 exports.getDay = getDay;
 exports.parseTime = parseTime;
+exports.getMoment = getMoment;
 
 
 const STRING_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSS';
@@ -79,4 +80,12 @@ function parseTime(date) {
   }
 
   return date % 100;
+}
+
+/**
+ * Gets a moment from a date integer
+ * @param {*} date
+ */
+function getMoment(date) {
+  return moment(date, 'YYYYMMDD');
 }

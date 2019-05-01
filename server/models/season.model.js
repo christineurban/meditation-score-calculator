@@ -53,15 +53,23 @@ const SeasonSchema = new Schema({
 /**
  * Calculate meditation score
  */
-SeasonSchema.methods.calculateScore = async function(date) {
-  const totalDays = (date - this.startDate) / (60 * 60 * 24 * 1000) + 1;
+SeasonSchema.methods.calculateScore = function(date) {
+  const totalDays = (dateUtil.getMoment(date) - dateUtil.getMoment(this.startDate)) / (60 * 60 * 24 * 1000) + 1;
+
+  let totalMinutes = 0;
 
   // eslint-disable-next-line handle-callback-err
-  await this.populate('days', (err, season) => {
-    this.score = Math.round(season.days.reduce((minutes, day) => day.totalMinutes + minutes, 0)) / (totalDays * this.minutesPerDayRequired);
-  });
+  this.populate('days', (err, season) => {
+    const days = season.days;
 
-  return this.save();
+    for (let i = 0; i < days.length; i++) {
+      totalMinutes += days[i].totalMinutes;
+    }
+
+    this.score = Math.round((totalMinutes / (totalDays * this.minutesPerDayRequired)) * 100);
+
+    return this.save();
+  });
 };
 
 
