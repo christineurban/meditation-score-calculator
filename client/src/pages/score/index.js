@@ -48,6 +48,8 @@ class Score extends Component {
       startDate: '',
       endDate: '',
       daysUntilEndOfSeason: '',
+      minutes: 0,
+      dateTime: moment(),
       open: false
     };
 
@@ -57,25 +59,40 @@ class Score extends Component {
   componentDidMount() {
     document.title = `Score | ${config.app.title}`;
 
-    const date = new Date();
+    const date = moment();
 
     Client.fetch('/api/getCurrentSeason', {
       method: 'POST',
-      body: { date, tz: -(date.getTimezoneOffset() / 60) }
+      body: { date, tz: moment.parseZone(date).utcOffset() / 60 }
     }).then((season = {}) => {
-      this.setState({
-        score: season.score,
-        seasonName: season.name,
-        endOfSeasonName: season.endOfSeasonName,
-        startDate: this.parseDatetoString(season.startDate),
-        endDate: this.parseDatetoString(season.endDate),
-        daysUntilEndOfSeason: this.getDaysUntilEndOfSeason(season.endDate)
-      });
+      this.updateSeasonState(season);
     });
   }
 
   handleClickOpen = () => {
     this.setState({ open: true });
+  };
+
+  handleSubmit = (evt) => {
+    evt.preventDefault();
+
+    const { minutes, dateTime } = this.state;
+
+    Client.fetch('/api/meditations', {
+      method: 'POST',
+      body: { minutes, dateTime, tz: moment.parseZone(dateTime).utcOffset() / 60 }
+    }).then(({ meditation, day, season }) => {
+      this.updateSeasonState(season);
+      this.toggleAddMeditation();
+    });
+  }
+
+  handleMinutesChange = (evt) => {
+    this.setState({ minutes: evt.target.value });
+  }
+
+  handleDateTimeChange = (dateTime) => {
+    this.setState({ dateTime });
   };
 
   toggleAddMeditation = () => {
@@ -106,13 +123,24 @@ class Score extends Component {
   getDaysUntilEndOfSeason = (endDate) => {
     if (endDate) {
       const curr = new moment().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-      const year = Math.floor(endDate / 10000)
+      const year = Math.floor(endDate / 10000);
       const month = Math.floor(endDate / 100) % 100 - 1;
       const day = endDate % 100;
-      const end = moment(`${year}-${month}-${day}`);
+      const end = moment(`${year}-${month}-${day}`, 'YYYY-MM-DD');
 
       return (end - curr) / (60 * 60 * 24 * 1000);
     }
+  }
+
+  updateSeasonState(season) {
+    this.setState({
+      score: Math.round(season.score),
+      seasonName: season.name,
+      endOfSeasonName: season.endOfSeasonName,
+      startDate: this.parseDatetoString(season.startDate),
+      endDate: this.parseDatetoString(season.endDate),
+      daysUntilEndOfSeason: this.getDaysUntilEndOfSeason(season.endDate)
+    })
   }
 
   render() {
@@ -160,6 +188,9 @@ class Score extends Component {
               <AddMeditation
                 open={this.state.open}
                 toggleAddMeditation={this.toggleAddMeditation}
+                handleSubmit={this.handleSubmit}
+                handleMinutesChange={this.handleMinutesChange}
+                handleDateTimeChange={this.handleDateTimeChange}
               />
             ) : null}
           </div>

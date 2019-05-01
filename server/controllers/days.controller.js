@@ -1,5 +1,4 @@
 const mongoose = require('mongoose'),
-      dateUtil = require('../util/date'),
       errorHandler = require('./errors.controller');
 
 const Day = mongoose.model('Day');
@@ -42,26 +41,22 @@ async function dayById(req, res, next, id) {
   next();
 }
 
-async function getDayByDate(clientDate, season, minutes, user) {
-  // reset time to midnight
-  const date = dateUtil.parseString(clientDate);
-
+async function getDayByDate(date, season, minutes, user) {
   let day;
 
   // check if the day exists
   try {
     day = await Day.findOne({
       _userId: user._id,
-      startDate: { $gte: date },
-      endDate: { $lte: date }
+      date
     });
   } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+    throw new Error('Error finding Day:', e);
   }
 
   // if it does not, make one based on current date sent from the client
   if (!day) {
-    saveNewDay(date, season, minutes, user);
+    day = await saveNewDay(date, season, user);
   }
 
   // add the meditation minutes
@@ -71,7 +66,7 @@ async function getDayByDate(clientDate, season, minutes, user) {
   try {
     day = await day.save();
   } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+    throw new Error('Error saving Day', e);
   }
 
   return day;
@@ -97,12 +92,11 @@ function loadDay(req, res) {
   res.json(req.day);
 }
 
-async function saveNewDay(date, season, minutes, user) {
+async function saveNewDay(date, season, user) {
   // Make a season with the data
   let day = new Day({
     _userId: user._id,
-    date: dateUtil.parseString(date),
-    totalMinutes: minutes,
+    date,
     season: season._id
   });
 
@@ -110,7 +104,7 @@ async function saveNewDay(date, season, minutes, user) {
   try {
     day = await day.save();
   } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+    throw new Error('Error saving Day', e);
   }
 
   // Lastly add the day to the season

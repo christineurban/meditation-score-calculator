@@ -8,7 +8,11 @@ const Schema = mongoose.Schema;
 const DaySchema = new Schema({
   date: {
     type: Number, // 20190922
-    required: 'A Day must have a date'
+    required: 'A Day must have a date',
+    index: {
+      unique: true,
+      sparse: true
+    }
   },
   meditations: [{
     type: Schema.ObjectId,
@@ -28,17 +32,6 @@ const DaySchema = new Schema({
     required: 'An Day must belong to an user',
     select: false
   }
-});
-
-/**
- * Calculate total minutes before saving
- */
-DaySchema.pre('save', function(next) {
-  this.totalMinutes = this.meditations.reduce((sum, meditation) => {
-    return meditation.minutes + sum;
-  }, 0);
-
-  next();
 });
 
 

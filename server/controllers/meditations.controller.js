@@ -1,4 +1,5 @@
 const mongoose = require('mongoose'),
+      dateUtil = require('../util/date'),
       daysController = require('./days.controller'),
       seasonsController = require('./seasons.controller'),
       errorHandler = require('./errors.controller');
@@ -63,17 +64,27 @@ function loadMeditation(req, res) {
 }
 
 async function saveNewMeditation(req, res) {
-  const date = req.body.date;
+  const minutes = parseInt(req.body.minutes);
+  const tz = req.body.tz;
+  const tzAdjustedDate = dateUtil.adjustToTimeZone(req.body.dateTime, tz);
+  const date = dateUtil.parseDate(tzAdjustedDate);
+
   // start by getting/creating a season
-  const season = seasonsController.getSeasonByDate(date, -(date.getTimezoneOffset() / 60), req.user);
+  let season = await seasonsController.getSeasonByDate(date, tz, req.user);
+
   // then get/create a day and pass the minutes to it
-  const day = daysController.getDayByDate(date, season, req.body.minutes, req.user);
+  let day = await daysController.getDayByDate(date, season, minutes, req.user);
 
   // Create a new meditation out of the request body
-  let meditation = new Meditation(req.body);
+  let meditation = new Meditation({
+    minutes,
+    time: dateUtil.parseTime(tzAdjustedDate)
+  });
 
-  // And fill out the user field (don't trust the ui)
+  // Fill out the user field (don't trust the ui)
   meditation._userId = req.user._id;
+  // Add the day to the meditation
+  meditation.day = day._id;
 
   // Then save the meditation
   try {
@@ -85,14 +96,21 @@ async function saveNewMeditation(req, res) {
   // Add the meditation to the day
   day.meditations.addToSet(meditation._id);
 
-  // And the day to the meditation
-  meditation.day = day._id;
+  // And save the day
+  try {
+    day = await day.save();
+  } catch (e) {
+    return errorHandler.handleError(res, 500, e);
+  }
+
+  // Add the day to the season
+  season.days.addToSet(day._id);
 
   // Trigger a season score calculation
-  seasonsController.calculateScore(season, date);
+  season = await season.calculateScore(date);
 
-  // And return the saved meditation to the ui
-  res.json(meditation);
+  // And return the saved meditation, day, and season to the ui
+  res.json({ meditation, day, season });
 }
 
 async function updateMeditation(req, res) {

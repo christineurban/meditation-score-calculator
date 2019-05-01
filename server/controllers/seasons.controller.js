@@ -44,11 +44,16 @@ async function seasonById(req, res, next, id) {
   next();
 }
 
+/**
+ * date: string '2019-05-01T04:52:07.457Z' (is local from client but gets converted to UTC in request)
+ * tz: string '-7'
+ */
 async function getCurrentSeason(req, res) {
-  const date = req.body.date;
+  // adjust the date to local and get the date integer
   const tz = req.body.tz;
+  const date = dateUtil.parseDate(dateUtil.adjustToTimeZone(req.body.date, tz));
 
-  let season = await _getSeasonByDate(date, tz, req.user);
+  let season = await _getSeasonByDate(date, req.user);
 
   if (!season) {
     const { start, end } = await _findApplicableSeason(
@@ -63,22 +68,20 @@ async function getCurrentSeason(req, res) {
       score: 0,
       seasonName,
       endOfSeasonName: _getEndOfSeasonName(seasonName),
-      startDate: dateUtil.parseData(start),
-      endDate: dateUtil.parseData(end)
+      startDate: dateUtil.parseDate(start),
+      endDate: dateUtil.parseDate(end)
     };
-  } else {
-    season.endOfSeasonName = _getEndOfSeasonName(season.name);
   }
-  console.log(season)
+
   res.json(season);
 }
 
-async function getSeasonByDate(clientDate, tz, user) {
-  const season = await _getSeasonByDate(clientDate, tz, user);
+async function getSeasonByDate(date, tz, user) {
+  let season = await _getSeasonByDate(date, user);
 
   // if it does not, make one based on current date sent from the client
   if (!season) {
-    saveNewSeason(clientDate, tz, user);
+    season = await saveNewSeason(date, tz, user);
   }
 
   return season;
@@ -106,21 +109,23 @@ function loadSeason(req, res) {
 
 async function saveNewSeason(date, tz, user) {
   // make request to get common equinox and solstice data, and find the season range
-  const { start, end } = _findApplicableSeason(date, tz, await _getSeasonData(dateUtil.getYear(date), tz));
+  const { start, end } = await _findApplicableSeason(date, tz, await _getSeasonData(dateUtil.getYear(date), tz));
+  const seasonName = _getSeasonName(start);
 
   // Make a season with the data
   let season = new Season({
     _userId: user._id,
-    name: _getDisplayName(end),
-    startDate: dateUtil.parseData(start),
-    endDate: dateUtil.parseData(end)
+    name: seasonName,
+    endOfSeasonName: await _getEndOfSeasonName(seasonName),
+    startDate: dateUtil.parseDate(start),
+    endDate: dateUtil.parseDate(end)
   });
 
   // Save the season
   try {
     season = await season.save();
   } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+    throw new Error('Error saving Season', e.message);
   }
 
   return season;
@@ -156,21 +161,18 @@ async function removeSeason(req, res) {
   res.sendStatus(200);
 }
 
-async function _getSeasonByDate(clientDate, user) {
-  // reset time to midnight
-  const date = dateUtil.parseString(clientDate);
-
+async function _getSeasonByDate(date, user) {
   let season;
 
   // check if the season exists
   try {
     season = await Season.findOne({
       _userId: user._id,
-      startDate: { $gte: date },
-      endDate: { $lte: date }
+      startDate: { $lte: date },
+      endDate: { $gte: date }
     });
   } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+    throw new Error('Error finding Season', e);
   }
 
   return season;
@@ -201,7 +203,7 @@ async function _getSeasonData(year, tz) {
   try {
     seasonData = await rp(`https://api.usno.navy.mil/seasons?year=${year}&tz=${tz}&dst=true`);
   } catch (e) {
-    return errorHandler.handleError({}, 500, e);
+    throw new Error('Error requesting Season data', e);
   }
 
   return JSON.parse(seasonData).data.filter((data) => {
@@ -222,7 +224,7 @@ async function _findApplicableSeason(date, tz, seasonData) {
   });
 
   if (end) {
-    if (end.month === '3') {
+    if (end.month === '03') {
       // start season goes into previous year
       const prevYear = await _getSeasonData(dateUtil.getYear(date) - 1, tz);
 
@@ -240,7 +242,7 @@ async function _findApplicableSeason(date, tz, seasonData) {
     const nextYear = await _getSeasonData(dateUtil.getYear(date) - 1, tz);
 
     end = nextYear.find((future) => {
-      return future.month === '3';
+      return future.month === '03';
     });
 
     start = seasonData.find((current) => {

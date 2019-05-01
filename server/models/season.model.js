@@ -13,6 +13,12 @@ const SeasonSchema = new Schema({
     enum: ['Spring', 'Summer', 'Fall', 'Winter'],
     required: 'Please provide the name of this Season'
   },
+  endOfSeasonName: {
+    type: String,
+    trim: true,
+    enum: ['Spring Equinox', 'Summer Solstice', 'Fall Equinox', 'Winter Solstice'],
+    required: 'Please provide the end of season name for this Season'
+  },
   startDate: {
     type: Number, // 20190922
     required: 'A Season must have a start date'
@@ -33,7 +39,8 @@ const SeasonSchema = new Schema({
     default: 90
   },
   score: {
-    type: Number
+    type: Number,
+    default: 0
   },
   _userId: {
     type: String,
@@ -44,15 +51,17 @@ const SeasonSchema = new Schema({
 });
 
 /**
- * Calculate meditation score before saving
+ * Calculate meditation score
  */
-SeasonSchema.methods.calculateScore = function(date) {
-  const totalDays = (dateUtil.parseString(date) - dateUtil.parseString(this.startDate)) / (60 * 60 * 24 * 1000) + 1;
-  const totalMinutes = this.days.reduce((minutes, day) => {
-    return day.totalMinutes + minutes;
-  }, 0);
+SeasonSchema.methods.calculateScore = async function(date) {
+  const totalDays = (date - this.startDate) / (60 * 60 * 24 * 1000) + 1;
 
-  this.score = Math.round(totalMinutes / (totalDays * this.minutesPerDayRequired));
+  // eslint-disable-next-line handle-callback-err
+  await this.populate('days', (err, season) => {
+    this.score = Math.round(season.days.reduce((minutes, day) => day.totalMinutes + minutes, 0)) / (totalDays * this.minutesPerDayRequired);
+  });
+
+  return this.save();
 };
 
 

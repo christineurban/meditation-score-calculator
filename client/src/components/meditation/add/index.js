@@ -10,8 +10,9 @@ import {
   TextField
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, DateTimePicker } from 'material-ui-pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import moment from 'moment';
 
 const styles = (theme) => ({
   button: {
@@ -35,43 +36,10 @@ class AddMeditation extends Component {
     super(props);
 
     this.state = {
-      open: false,
-      minutes: 0,
-      date: new Date(),
-      time: new Date()
+      open: false
     };
 
     this.classes = props.classes;
-  }
-
-  handleMinutesChange = (evt) => {
-    this.setState({ minutes: evt.target.value });
-  }
-
-  handleDateChange = (date) => {
-    this.setState({ date });
-  };
-
-  handleTimeChange = (time) => {
-    this.setState({ time });
-  };
-
-  handleSubmit = () => {
-    console.log(this.state);
-    this.props.toggleAddMeditation();
-  }
-
-  handleSubmit = (evt) => {
-    evt.preventDefault();
-
-    const { minutes, date, time } = this.state;
-
-    Client.fetch('/api/meditations', {
-      method: 'POST',
-      body: { minutes, date, time }
-    }).then(() => {
-      this.props.toggleAddMeditation();
-    });
   }
 
   render() {
@@ -82,7 +50,7 @@ class AddMeditation extends Component {
         onBackdropClick={this.props.toggleAddMeditation}
       >
         <DialogTitle id="form-dialog-title">How many minutes was your meditation?</DialogTitle>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.props.handleSubmit}>
           <Grid
             container
             className={this.classes.grid}
@@ -94,7 +62,7 @@ class AddMeditation extends Component {
               <TextField
                 id="outlined-number"
                 label="Minutes"
-                onChange={this.handleMinutesChange}
+                onChange={this.props.handleMinutesChange}
                 type="number"
                 className={this.classes.textField}
                 InputLabelProps={{
@@ -111,8 +79,8 @@ class AddMeditation extends Component {
                   margin="normal"
                   label="Date and Time"
                   variant="outlined"
-                  value={this.state.time}
-                  onChange={this.handleTimeChange}
+                  value={this.state.dateTime}
+                  onChange={this.props.handleDateTimeChange}
                   format="MMM dd yyyy, h:mm a"
                   showTodayButton
                   disableFuture
@@ -137,7 +105,10 @@ class AddMeditation extends Component {
 AddMeditation.propTypes = {
   classes: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,
-  toggleAddMeditation: PropTypes.func.isRequired
+  toggleAddMeditation: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  handleMinutesChange: PropTypes.func.isRequired,
+  handleDateTimeChange: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(AddMeditation);
